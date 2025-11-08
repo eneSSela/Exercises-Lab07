@@ -10,10 +10,22 @@ import it.unibo.inner.api.Predicate;
 public class IterableWithPolicyImpl<T> implements IterableWithPolicy<T> {
 
     private ArrayList<T> list = new ArrayList<>();
+    private Predicate<T> filter;
 
-    
     public IterableWithPolicyImpl(final ArrayList<T> list) {
-        this.list = list;
+        this(list, 
+            new Predicate<T>() {
+                @Override
+                public boolean test(T elem) {
+                    return true;
+                }            
+            }
+        );
+    }
+
+    public IterableWithPolicyImpl(final ArrayList<T> elements, Predicate<T> filter) {
+        this.list = elements;
+        this.setIterationPolicy(filter);
     }
 
     @Override
@@ -23,7 +35,7 @@ public class IterableWithPolicyImpl<T> implements IterableWithPolicy<T> {
 
     @Override
     public void setIterationPolicy(Predicate<T> filter) {
-        /*Empty*/
+        this.filter = filter;
     }
 
 
@@ -33,7 +45,11 @@ public class IterableWithPolicyImpl<T> implements IterableWithPolicy<T> {
 
         @Override
         public boolean hasNext() {
-            return index < list.size();
+            /*scorro solo gli elementi dentro alla lista che soddisfano il filtro*/
+            while(index < list.size() && !filter.test(list.get(index))) {
+                index++;
+            }
+            return index < list.size(); 
         }
 
         @Override
